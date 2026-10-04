@@ -31,6 +31,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential pkg-config libx11-dev libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libfontconfig1-dev
 
+      - name: Prepare Windows Build Environment
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          mkdir -p .cargo
+          echo '[target.x86_64-pc-windows-msvc]' > .cargo/config.toml
+          echo 'rustflags = ["-C", "target-feature=+crt-static"]' >> .cargo/config.toml
+          echo '' >> Cargo.toml
+          echo '[build-dependencies]' >> Cargo.toml
+          echo 'winres = "0.1"' >> Cargo.toml
+          echo 'fn main() { winres::WindowsResource::new().set_icon("icon.ico").compile().unwrap(); }' > build.rs
+
       - name: Build Release
         run: cargo build --release
 
@@ -39,8 +51,6 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
-          curl -sL -o rcedit.exe https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
-          ./rcedit.exe target/release/bastetcipher.exe --set-icon icon.ico
           mv target/release/bastetcipher.exe dist/bastetcipher-windows.exe
 
       - name: Prepare macOS Package
@@ -113,4 +123,4 @@ jobs:
         with:
           draft: true
           files: release-binaries/*
-          name: "Release build - ${{ github.ref_name }}"
+          name: "Release post - ${{ github.ref_name }}"
