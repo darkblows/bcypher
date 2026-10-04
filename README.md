@@ -37,7 +37,7 @@
 <a name="-what-is-bastetcipher"></a>
 ## 🏛️ What is BastetCipher?
 
-**BastetCipher** (*Camera Sacra*) is a desktop security application and deterministic cipher generator. It began as a Python script and was rewritten from scratch in **Rust** for performance, reliability, and hardware-level security.
+**BastetCipher** (*Sacred Chamber*) is a desktop security application and deterministic cipher generator. It began as a Python script and was rewritten from scratch in **Rust** for performance, reliability, and hardware-level security.
 
 No sensitive data is ever written in cleartext to disk. No Internet connection is established (the application is **offline by design**). Every secret, password, or protected file exists only in volatile working memory, ready to be securely wiped (*secure zeroization*) when the session ends.
 
@@ -367,7 +367,7 @@ Refusal issues `ViewportCommand::Close`, which triggers **secure shutdown** (`se
 
 ### Graphical interface (GUI)
 
-Start the binary with no arguments to open the *Camera Sacra*:
+Start the binary with no arguments to open the *Sacred Chamber*:
 
 ```bash
 bastetcipher
@@ -699,7 +699,7 @@ Users who intend to deploy BastetCipher in regulated contexts (health, finance, 
 
 <div align="center">
 
-**☥  BastetCipher — Camera Sacra  ☥**
+**☥  BastetCipher — Sacred Chamber  ☥**
 
 *Offline by design. Zero-trace by principle. Memory-safe by construction.*
 
