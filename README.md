@@ -1,3 +1,6 @@
+<img width="1361" height="899" alt="Screenshot" src="https://github.com/user-attachments/assets/ad1b9b8b-b683-4969-9337-9850573a0cce" />
+
+
 # ☥ BastetCipher — Sacred Chamber
 
 <div align="center">
