@@ -34,20 +34,65 @@ jobs:
       - name: Build Release
         run: cargo build --release
 
-      - name: Rename Linux/macOS binary
-        if: matrix.os != 'windows-latest'
-        run: mv target/release/bastetcipher target/release/bastetcipher-${{ matrix.os }}
-
-      - name: Rename Windows binary
+      - name: Prepare Windows Package
         if: matrix.os == 'windows-latest'
         shell: bash
-        run: mv target/release/bastetcipher.exe target/release/bastetcipher-${{ matrix.os }}.exe
+        run: |
+          mkdir -p dist
+          curl -sL -o rcedit.exe https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
+          ./rcedit.exe target/release/bastetcipher.exe --set-icon icon.ico
+          mv target/release/bastetcipher.exe dist/bastetcipher-windows.exe
+
+      - name: Prepare macOS Package
+        if: matrix.os == 'macos-latest'
+        run: |
+          mkdir -p dist
+          mkdir -p "BastetCipher.app/Contents/MacOS"
+          mkdir -p "BastetCipher.app/Contents/Resources"
+          cp target/release/bastetcipher "BastetCipher.app/Contents/MacOS/bastetcipher"
+          mkdir icon.iconset
+          sips -z 16 16     icon.png --out icon.iconset/icon_16x16.png
+          sips -z 32 32     icon.png --out icon.iconset/icon_16x16@2x.png
+          sips -z 32 32     icon.png --out icon.iconset/icon_32x32.png
+          sips -z 64 64     icon.png --out icon.iconset/icon_32x32@2x.png
+          sips -z 128 128   icon.png --out icon.iconset/icon_128x128.png
+          sips -z 256 256   icon.png --out icon.iconset/icon_128x128@2x.png
+          sips -z 256 256   icon.png --out icon.iconset/icon_256x256.png
+          sips -z 512 512   icon.png --out icon.iconset/icon_256x256@2x.png
+          sips -z 512 512   icon.png --out icon.iconset/icon_512x512.png
+          sips -z 1024 1024 icon.png --out icon.iconset/icon_512x512@2x.png
+          iconutil -c icns icon.iconset -o "BastetCipher.app/Contents/Resources/icon.icns"
+          cat << 'EOF' > BastetCipher.app/Contents/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>bastetcipher</string>
+              <key>CFBundleIconFile</key>
+              <string>icon.icns</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.darkblows.bastetcipher</string>
+              <key>CFBundleName</key>
+              <string>BastetCipher</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+          </dict>
+          </plist>
+          EOF
+          zip -r dist/bastetcipher-macos.zip BastetCipher.app
+
+      - name: Prepare Linux Package
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p dist
+          mv target/release/bastetcipher dist/bastetcipher-linux
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.os }}
-          path: target/release/bastetcipher-*
+          path: dist/*
 
   release:
     name: Create Draft Release
