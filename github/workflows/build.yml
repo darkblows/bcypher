@@ -1,0 +1,79 @@
+name: Build and Draft Release
+
+on:
+  # 1. Si avvia automaticamente quando crei un "Tag" (es. v0.4.0)
+  push:
+    tags:
+      - 'v*'
+  # 2. Ti permette di avviare la creazione della release a mano con un bottone!
+  workflow_dispatch:
+
+jobs:
+  # FASE 1: Compilazione sui vari sistemi
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libx11-dev libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+
+      - name: Build Release
+        run: cargo build --release
+
+      # Rinominiamo i file aggiungendo il nome del SO, altrimenti Mac e Linux
+      # si chiamerebbero entrambi "bastetcipher" e andrebbero in conflitto
+      - name: Rename Linux/macOS binary
+        if: matrix.os != 'windows-latest'
+        run: mv target/release/bastetcipher target/release/bastetcipher-${{ matrix.os }}
+
+      - name: Rename Windows binary
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: mv target/release/bastetcipher.exe target/release/bastetcipher-${{ matrix.os }}.exe
+
+      # Salviamo temporaneamente i file appena rinominati
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.os }}
+          path: target/release/bastetcipher-*
+
+  # FASE 2: Creazione della Release (parte solo quando FASE 1 ha finito)
+  release:
+    name: Create Draft Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Fondamentale: dà il permesso a GitHub Actions di creare la release
+
+    steps:
+      # Scarica tutti i file compilati dalla Fase 1
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-binaries
+          merge-multiple: true
+
+      # Crea la Draft Release e allega i file
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true # La imposta come Bozza!
+          files: release-binaries/*
+          name: "Bozza di Rilascio - ${{ github.ref_name }}"
