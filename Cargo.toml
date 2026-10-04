@@ -1,0 +1,65 @@
+[package]
+name = "bastetcipher"
+version = "0.4.0"
+edition = "2021"
+description = "BastetCipher - Sacred Chamber (Rust)"
+
+[dependencies]
+base64 = "0.22"
+sha2 = "0.10"
+sha3 = "0.10"
+pbkdf2 = "0.12"
+argon2 = { version = "0.5", features = ["zeroize"] }
+aes = "0.8"
+aes-gcm = "0.10"
+cbc = { version = "0.1", features = ["alloc"] }
+flate2 = "1"
+crc32fast = "1"
+zeroize = "1"
+getrandom = "0.2"
+rpassword = "7"
+eframe = { version = "0.33", default-features = false, features = ["default_fonts", "glow", "x11", "wayland"] }
+egui_extras = { version = "0.33", features = ["image"] }
+raw-window-handle = "0.6"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "bmp", "webp", "ico", "tiff"] }
+rodio = { version = "0.19", default-features = false, features = ["symphonia-all"] }
+symphonia = { version = "0.5", features = ["all"] }
+hayro = "=0.5.0"
+pdf-extract = "0.8"
+rusty_h264-decoder = "=0.16.0"
+rust_h265 = "=0.1.0"
+rusty_vp9 = "=0.1.1"
+matroska-demuxer = "=0.8.1"
+resvg = "0.44"
+usvg = "0.44"
+tiny-skia = "0.11"
+blitz-html = "=0.3.0-beta.2"
+blitz-dom = "=0.3.0-beta.2"
+blitz-paint = "=0.3.0-beta.2"
+blitz-traits = "=0.3.0-beta.2"
+anyrender = "0.13"
+anyrender_vello_cpu = "0.17"
+peniko = "0.6"
+kurbo = "0.13"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_JobObjects",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Memory",
+    "Win32_System_ProcessStatus",
+    "Win32_System_SystemServices",
+    "Win32_System_Threading",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[profile.release]
+opt-level = 3
+lto = false
+codegen-units = 16
