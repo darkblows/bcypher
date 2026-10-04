@@ -1,4 +1,4 @@
-# ☥ BastetCipher — Camera Sacra
+# ☥ BastetCipher — Sacred Chamber
 
 <div align="center">
 
