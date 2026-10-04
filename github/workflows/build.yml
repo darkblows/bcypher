@@ -1,15 +1,12 @@
 name: Build and Draft Release
 
 on:
-  # 1. Si avvia automaticamente quando crei un "Tag" (es. v0.4.0)
   push:
     tags:
       - 'v*'
-  # 2. Ti permette di avviare la creazione della release a mano con un bottone!
   workflow_dispatch:
 
 jobs:
-  # FASE 1: Compilazione sui vari sistemi
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -36,8 +33,6 @@ jobs:
       - name: Build Release
         run: cargo build --release
 
-      # Rinominiamo i file aggiungendo il nome del SO, altrimenti Mac e Linux
-      # si chiamerebbero entrambi "bastetcipher" e andrebbero in conflitto
       - name: Rename Linux/macOS binary
         if: matrix.os != 'windows-latest'
         run: mv target/release/bastetcipher target/release/bastetcipher-${{ matrix.os }}
@@ -47,30 +42,27 @@ jobs:
         shell: bash
         run: mv target/release/bastetcipher.exe target/release/bastetcipher-${{ matrix.os }}.exe
 
-      # Salviamo temporaneamente i file appena rinominati
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.os }}
           path: target/release/bastetcipher-*
 
-  # FASE 2: Creazione della Release (parte solo quando FASE 1 ha finito)
   release:
     name: Create Draft Release
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Fondamentale: dà il permesso a GitHub Actions di creare la release
+      contents: write
 
     steps:
-      # Scarica tutti i file compilati dalla Fase 1
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-binaries
           merge-multiple: true
 
-      # Crea la Draft Release e allega i file
       - name: Create Draft Release
         uses: softprops/action-gh-release@v2
         with:
